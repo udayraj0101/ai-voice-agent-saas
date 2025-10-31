@@ -1,7 +1,7 @@
-echo "node_modules/
+node_modules/
 .env
 *.log
 .DS_Store
 .vscode/
 dist/
-build/" > .gitignore
+build/
