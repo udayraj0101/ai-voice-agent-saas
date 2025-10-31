@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🤖</span>
+                    <span>Vendor Panel</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/vendor/dashboard" class="nav-link active">
+                        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/calls" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-telephone"></i></span>
+                        <span>Manage Call Schedules</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                        <span>Edit Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile-details" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-person"></i></span>
+                        <span>View Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: auto; padding-top: 2rem;">
+                    <a href="/vendor/logout" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="header-title">Dashboard</h1>
+                    <div class="header-actions">
+                        <div class="admin-info" onclick="toggleProfileDropdown()" style="cursor: pointer; position: relative;">
+                            <div class="admin-avatar"><%= vendor.firstName.charAt(0) %><%= vendor.lastName.charAt(0) %></div>
+                            <span><%= vendor.firstName %> <%= vendor.lastName %></span>
+                            <span style="margin-left: 0.5rem; font-size: 0.75rem;">▼</span>
+                            
+                            <!-- Profile Dropdown -->
+                            <div id="profileDropdown" class="profile-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
+                                <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                                    <div style="font-weight: 600; color: var(--gray-900);"><%= vendor.firstName %> <%= vendor.lastName %></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);"><%= vendor.email %></div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">Company: <%= vendor.companyName || 'Not set' %></div>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <a href="/vendor/profile-details" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-person"></i> View Profile
+                                    </a>
+                                    <a href="/vendor/profile" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-gear"></i> Edit Profile
+                                    </a>
+                                    <a href="/vendor/logout" style="display: block; padding: 0.5rem 1rem; color: var(--danger); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Welcome Section -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-body">
+                        <h2 style="margin-bottom: 0.5rem;">Welcome back, <%= vendor.firstName %>! 👋</h2>
+                        <p style="color: var(--gray-600); margin-bottom: 1rem;"><strong><%= vendor.companyName %></strong> | <%= vendor.businessType %> | Ready to automate your voice calls</p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <a href="/vendor/calls" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Schedule New Call
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="bi bi-telephone" style="font-size: 2rem;"></i></div>
+                        </div>
+                        <div class="stat-value"><%= scheduledCalls.length %></div>
+                        <div class="stat-label">Total Calls</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="bi bi-check-circle" style="font-size: 2rem; color: var(--success);"></i></div>
+                        </div>
+                        <div class="stat-value"><%= scheduledCalls.filter(call => call.status === 'completed').length %></div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="bi bi-clock" style="font-size: 2rem; color: var(--warning);"></i></div>
+                        </div>
+                        <div class="stat-value"><%= scheduledCalls.filter(call => call.status === 'pending').length %></div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="bi bi-x-circle" style="font-size: 2rem; color: var(--danger);"></i></div>
+                        </div>
+                        <div class="stat-value"><%= scheduledCalls.filter(call => call.status === 'failed').length %></div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+
+                <% if (messages.error) { %>
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> <%= messages.error %>
+                    </div>
+                <% } %>
+                <% if (messages.success) { %>
+                    <div class="alert alert-success">
+                        <strong>Success:</strong> <%= messages.success %>
+                    </div>
+                <% } %>
+
+                <!-- Recent Calls Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="bi bi-calendar-event"></i> Recent Calls (<%= scheduledCalls.length %>)</h3>
+                    </div>
+                        <div class="card-body">
+                            <div style="max-height: 32rem; overflow-y: auto;">
+                                <% if (scheduledCalls.length === 0) { %>
+                                    <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📞</div>
+                                        <h3 style="margin-bottom: 0.5rem;">No calls scheduled yet</h3>
+                                        <p style="margin-bottom: 1rem;">Schedule your first AI voice call to get started!</p>
+                                        <a href="/vendor/calls" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle"></i> Schedule First Call
+                                        </a>
+                                    </div>
+                                <% } else { %>
+                                    <div class="table-container">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Phone</th>
+                                                    <th>Status</th>
+                                                    <th>Scheduled</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% scheduledCalls.forEach(call => { %>
+                                                    <tr>
+                                                        <td><%= call.phoneNumber %></td>
+                                                        <td>
+                                                            <span class="badge badge-<%= call.status === 'completed' ? 'success' : call.status === 'failed' ? 'danger' : 'warning' %>">
+                                                                <%= call.status.toUpperCase() %>
+                                                            </span>
+                                                        </td>
+                                                        <td><%= new Date(call.scheduledTime).toLocaleDateString() %></td>
+                                                        <td>
+                                                            <a href="/vendor/calls" class="btn btn-outline btn-sm">
+                                                                <i class="bi bi-pencil"></i> Edit
+                                                            </a>
+                                                            <a href="/vendor/calls" class="btn btn-danger btn-sm">
+                                                                <i class="bi bi-trash"></i> Delete
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const adminInfo = document.querySelector('.admin-info');
+            const dropdown = document.getElementById('profileDropdown');
+            if (adminInfo && dropdown && !adminInfo.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Set active nav link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>

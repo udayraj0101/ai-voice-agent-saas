@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Profile - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🤖</span>
+                    <span>Vendor Panel</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/vendor/dashboard" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/calls" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-telephone"></i></span>
+                        <span>Manage Call Schedules</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile" class="nav-link active">
+                        <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                        <span>Edit Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile-details" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-person"></i></span>
+                        <span>View Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: auto; padding-top: 2rem;">
+                    <a href="/vendor/logout" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="header-title">Edit Profile</h1>
+                    <div class="header-actions">
+                        <div class="admin-info" onclick="toggleProfileDropdown()" style="cursor: pointer; position: relative;">
+                            <div class="admin-avatar"><%= vendor.firstName.charAt(0) %><%= vendor.lastName.charAt(0) %></div>
+                            <span><%= vendor.firstName %> <%= vendor.lastName %></span>
+                            <span style="margin-left: 0.5rem; font-size: 0.75rem;">▼</span>
+                            
+                            <!-- Profile Dropdown -->
+                            <div id="profileDropdown" class="profile-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
+                                <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                                    <div style="font-weight: 600; color: var(--gray-900);"><%= vendor.firstName %> <%= vendor.lastName %></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);"><%= vendor.email %></div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">Company: <%= vendor.companyName || 'Not set' %></div>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <a href="/vendor/profile-details" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-person"></i> View Profile
+                                    </a>
+                                    <a href="/vendor/profile" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-gear"></i> Edit Profile
+                                    </a>
+                                    <a href="/vendor/logout" style="display: block; padding: 0.5rem 1rem; color: var(--danger); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <div class="card-header">
+                        <h3 class="card-title">📄 Profile Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <% if (messages.error) { %>
+                            <div class="alert alert-error">
+                                <strong>Error:</strong> <%= messages.error %>
+                            </div>
+                        <% } %>
+                        <% if (messages.success) { %>
+                            <div class="alert alert-success">
+                                <strong>Success:</strong> <%= messages.success %>
+                            </div>
+                        <% } %>
+                        
+                        <form method="POST" action="/vendor/profile">
+                            <div style="margin-bottom: 2rem;">
+                                <h3 style="margin-bottom: 1rem; color: var(--gray-800);">👤 Personal Information</h3>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">First Name</label>
+                                        <input type="text" name="firstName" value="<%= vendor.firstName || '' %>" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Last Name</label>
+                                        <input type="text" name="lastName" value="<%= vendor.lastName || '' %>" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Position/Title</label>
+                                        <input type="text" name="position" value="<%= vendor.position || '' %>" required placeholder="e.g. CEO, Sales Manager" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Personal Phone</label>
+                                        <input type="tel" name="phone" value="<%= vendor.phone || '' %>" required placeholder="+1 (555) 123-4567" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 2rem;">
+                                <h3 style="margin-bottom: 1rem; color: var(--gray-800);">🏢 Company Information</h3>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Company Name</label>
+                                    <input type="text" name="companyName" value="<%= vendor.companyName || '' %>" required placeholder="Your Company Inc." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Company Phone</label>
+                                        <input type="tel" name="companyPhone" value="<%= vendor.companyPhone || '' %>" required placeholder="+1 (555) 987-6543" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Business Type</label>
+                                        <select name="businessType" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                            <option value="">Select Business Type</option>
+                                            <option value="Technology" <%= vendor.businessType === 'Technology' ? 'selected' : '' %>>Technology</option>
+                                            <option value="Healthcare" <%= vendor.businessType === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
+                                            <option value="Finance" <%= vendor.businessType === 'Finance' ? 'selected' : '' %>>Finance</option>
+                                            <option value="Retail" <%= vendor.businessType === 'Retail' ? 'selected' : '' %>>Retail</option>
+                                            <option value="Education" <%= vendor.businessType === 'Education' ? 'selected' : '' %>>Education</option>
+                                            <option value="Real Estate" <%= vendor.businessType === 'Real Estate' ? 'selected' : '' %>>Real Estate</option>
+                                            <option value="Marketing" <%= vendor.businessType === 'Marketing' ? 'selected' : '' %>>Marketing</option>
+                                            <option value="Consulting" <%= vendor.businessType === 'Consulting' ? 'selected' : '' %>>Consulting</option>
+                                            <option value="Other" <%= vendor.businessType === 'Other' ? 'selected' : '' %>>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Company Address</label>
+                                    <input type="text" name="companyAddress" value="<%= vendor.companyAddress || '' %>" required placeholder="123 Business St, City, State 12345" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Company Website (Optional)</label>
+                                    <input type="url" name="companyWebsite" value="<%= vendor.companyWebsite || '' %>" placeholder="https://yourcompany.com" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Company Description (for AI Agent Context)</label>
+                                    <textarea name="companyDescription" rows="4" placeholder="Describe your company, services, target audience, and what the AI agent should know when making calls on your behalf..." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 100px;"><%= vendor.companyDescription || '' %></textarea>
+                                    <small style="color: var(--gray-500); font-size: 0.8rem; margin-top: 0.5rem; display: block;">
+                                        💡 This helps the AI agent understand your business and communicate effectively with your prospects.
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem;">
+                                <button type="submit" class="btn btn-success">
+                                    🚀 <%= vendor.isProfileComplete ? 'Update Profile' : 'Complete Profile' %>
+                                </button>
+                                <% if (vendor.isProfileComplete) { %>
+                                    <a href="/vendor/dashboard" class="btn btn-outline">Cancel</a>
+                                <% } %>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const adminInfo = document.querySelector('.admin-info');
+            const dropdown = document.getElementById('profileDropdown');
+            if (adminInfo && dropdown && !adminInfo.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Set active nav link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

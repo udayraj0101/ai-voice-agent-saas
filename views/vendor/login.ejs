@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+    <div class="floating-elements"></div>
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="brand-icon"></div>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your AI Voice Agent dashboard</p>
+            </div>
+            
+            <% if (messages.error) { %>
+                <div class="alert alert-error">
+                    <strong>Error:</strong> <%= messages.error %>
+                </div>
+            <% } %>
+            
+            <form method="POST" action="/vendor/login" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <span class="input-icon" data-icon="@"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            ●●●
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="loginBtn">
+                    Sign In to Dashboard
+                </button>
+            </form>
+            
+            <div class="auth-link">
+                <p>New to AI Voice Agent?</p>
+                <a href="/vendor/register">Create your account →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle function
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'ABC';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '●●●';
+            }
+        }
+        
+        // Add loading animation on form submit
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+            btn.textContent = 'Signing In...';
+        });
+        
+        // Add focus animations
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+    <div class="floating-elements"></div>
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="brand-icon"></div>
+                <h1>Join AI Voice Agent</h1>
+                <p>Create your account and start automating calls</p>
+            </div>
+            
+            <% if (messages.error) { %>
+                <div class="alert alert-error">
+                    <strong>Error:</strong> <%= messages.error %>
+                </div>
+            <% } %>
+            
+            <form method="POST" action="/vendor/register" id="registerForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" placeholder="Enter your business email" required>
+                        <span class="input-icon" data-icon="@"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="6">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            ●●●
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            ●●●
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="registerBtn">
+                    Create Account & Continue
+                </button>
+            </form>
+            
+            <div class="auth-link">
+                <p>Already have an account?</p>
+                <a href="/vendor/login">← Sign in here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle function
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'ABC';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '●●●';
+            }
+        }
+        
+        // Password strength checker
+        const passwordInput = document.getElementById('password');
+        const strengthIndicator = document.getElementById('passwordStrength');
+        const strengthBar = document.getElementById('strengthBar');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            
+            if (password.length > 0) {
+                strengthIndicator.classList.add('show');
+                strengthBar.className = 'password-strength-bar ' + strength;
+            } else {
+                strengthIndicator.classList.remove('show');
+            }
+        });
+        
+        function checkPasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            if (score < 3) return 'weak';
+            if (score < 4) return 'medium';
+            return 'strong';
+        }
+        
+        // Password confirmation validation
+        confirmPasswordInput.addEventListener('input', function() {
+            const password = passwordInput.value;
+            const confirmPassword = this.value;
+            const toggle = this.nextElementSibling;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = '#ef4444';
+            } else if (confirmPassword && password === confirmPassword) {
+                this.style.borderColor = '#10b981';
+            }
+        });
+        
+        // Form submission with validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            const btn = document.getElementById('registerBtn');
+            btn.classList.add('loading');
+            btn.textContent = 'Creating Account...';
+        });
+        
+        // Add focus animations
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

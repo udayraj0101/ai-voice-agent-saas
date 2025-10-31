@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Admins - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🤖</span>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/admin/dashboard" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/admin/vendors" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-people"></i></span>
+                        <span>Manage Vendors</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/admin/calls" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-telephone"></i></span>
+                        <span>Manage Calls</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/admin/admins" class="nav-link active">
+                        <span class="nav-icon"><i class="bi bi-shield-lock"></i></span>
+                        <span>Manage Admins</span>
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: auto; padding-top: 2rem;">
+                    <a href="/admin/logout" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="header-title">Manage Admins</h1>
+                    <div class="header-actions">
+                        <div class="admin-info" onclick="toggleProfileDropdown()" style="cursor: pointer; position: relative;">
+                            <div class="admin-avatar"><%= admin.firstName.charAt(0) %><%= admin.lastName.charAt(0) %></div>
+                            <span><%= admin.firstName %> <%= admin.lastName %></span>
+                            <span style="margin-left: 0.5rem; font-size: 0.75rem;">▼</span>
+                            
+                            <!-- Profile Dropdown -->
+                            <div id="profileDropdown" class="profile-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
+                                <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                                    <div style="font-weight: 600; color: var(--gray-900);"><%= admin.firstName %> <%= admin.lastName %></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);"><%= admin.email %></div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">Role: <%= admin.role.replace('_', ' ').toUpperCase() %></div>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <a href="/admin/logout" style="display: block; padding: 0.5rem 1rem; color: var(--danger); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <% if (messages.error) { %>
+                    <div class="alert alert-error"><%= messages.error %></div>
+                <% } %>
+                <% if (messages.success) { %>
+                    <div class="alert alert-success"><%= messages.success %></div>
+                <% } %>
+
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title"><i class="bi bi-shield-lock"></i> All Admins (<%= admins.length %>)</h3>
+                        <button class="btn btn-primary" onclick="openAddAdminModal()">
+                            <i class="bi bi-plus-circle"></i> Add Admin
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% admins.forEach(adminUser => { %>
+                                        <tr>
+                                            <td><%= adminUser.firstName %> <%= adminUser.lastName %></td>
+                                            <td><%= adminUser.email %></td>
+                                            <td>
+                                                <span class="badge badge-info">
+                                                    <%= adminUser.role.replace('_', ' ').toUpperCase() %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge <%= adminUser.isActive ? 'badge-success' : 'badge-danger' %>">
+                                                    <%= adminUser.isActive ? 'Active' : 'Inactive' %>
+                                                </span>
+                                            </td>
+                                            <td><%= new Date(adminUser.createdAt).toLocaleDateString() %></td>
+                                            <td style="white-space: nowrap; min-width: 200px;">
+                                                <% if (adminUser._id.toString() !== admin._id.toString()) { %>
+                                                    <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                                        <button class="btn btn-outline btn-sm" onclick="editAdmin('<%= adminUser._id %>')" 
+                                                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                            <i class="bi bi-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="btn <%= adminUser.isActive ? 'btn-danger' : 'btn-success' %> btn-sm" 
+                                                                onclick="toggleAdmin('<%= adminUser._id %>')" 
+                                                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                            <%= adminUser.isActive ? '<i class="bi bi-x-circle"></i> Deactivate' : '<i class="bi bi-check-circle"></i> Activate' %>
+                                                        </button>
+                                                        <button class="btn btn-danger btn-sm" onclick="deleteAdmin('<%= adminUser._id %>')" 
+                                                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </div>
+                                                <% } else { %>
+                                                    <span style="color: var(--gray-500); font-size: 0.8rem; font-style: italic;">Current User (You)</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Admin Modal -->
+    <div class="modal" id="addAdminModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-plus-circle"></i> Add New Admin</h3>
+            <form method="POST" action="/admin/admin/add">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">First Name</label>
+                    <input type="text" name="firstName" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Last Name</label>
+                    <input type="text" name="lastName" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Password</label>
+                    <input type="password" name="password" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Role</label>
+                    <select name="role" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Admin</button>
+                    <button type="button" class="btn btn-outline" onclick="closeAddAdminModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Admin Modal -->
+    <div class="modal" id="editAdminModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-pencil"></i> Edit Admin</h3>
+            <form id="editAdminForm">
+                <input type="hidden" id="editAdminId">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">First Name</label>
+                    <input type="text" id="editFirstName" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Last Name</label>
+                    <input type="text" id="editLastName" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                    <input type="email" id="editEmail" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Role</label>
+                    <select id="editRole" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Update Admin</button>
+                    <button type="button" class="btn btn-outline" onclick="closeEditAdminModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const adminInfo = document.querySelector('.admin-info');
+            const dropdown = document.getElementById('profileDropdown');
+            if (!adminInfo.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        function openAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'flex';
+        }
+        
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'none';
+        }
+        
+        function editAdmin(adminId) {
+            fetch('/admin/admin/' + adminId + '/edit')
+                .then(response => response.json())
+                .then(admin => {
+                    document.getElementById('editAdminId').value = admin._id;
+                    document.getElementById('editFirstName').value = admin.firstName;
+                    document.getElementById('editLastName').value = admin.lastName;
+                    document.getElementById('editEmail').value = admin.email;
+                    document.getElementById('editRole').value = admin.role;
+                    document.getElementById('editAdminModal').style.display = 'flex';
+                })
+                .catch(err => alert('Error loading admin details'));
+        }
+        
+        function closeEditAdminModal() {
+            document.getElementById('editAdminModal').style.display = 'none';
+        }
+        
+        document.getElementById('editAdminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const adminId = document.getElementById('editAdminId').value;
+            const formData = {
+                firstName: document.getElementById('editFirstName').value,
+                lastName: document.getElementById('editLastName').value,
+                email: document.getElementById('editEmail').value,
+                role: document.getElementById('editRole').value
+            };
+            
+            fetch('/admin/admin/' + adminId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeEditAdminModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(err => alert('Error updating admin'));
+        });
+        
+        function deleteAdmin(adminId) {
+            if (confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
+                fetch('/admin/admin/' + adminId, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                })
+                .catch(err => alert('Error deleting admin'));
+            }
+        }
+
+        function toggleAdmin(adminId) {
+            if (confirm('Are you sure you want to change this admin status?')) {
+                fetch('/admin/admin/' + adminId + '/toggle', {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                })
+                .catch(err => alert('Error updating admin'));
+            }
+        }
+    </script>
+</body>
+</html>

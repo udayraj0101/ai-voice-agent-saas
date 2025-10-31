@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Call Schedules - AI Voice Agent SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🤖</span>
+                    <span>Vendor Panel</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/vendor/dashboard" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/calls" class="nav-link active">
+                        <span class="nav-icon"><i class="bi bi-telephone"></i></span>
+                        <span>Manage Call Schedules</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                        <span>Edit Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/vendor/profile-details" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-person"></i></span>
+                        <span>View Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: auto; padding-top: 2rem;">
+                    <a href="/vendor/logout" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="header-title">Manage Call Schedules</h1>
+                    <div class="header-actions">
+                        <div class="admin-info" onclick="toggleProfileDropdown()" style="cursor: pointer; position: relative;">
+                            <div class="admin-avatar"><%= vendor.firstName.charAt(0) %><%= vendor.lastName.charAt(0) %></div>
+                            <span><%= vendor.firstName %> <%= vendor.lastName %></span>
+                            <span style="margin-left: 0.5rem; font-size: 0.75rem;">▼</span>
+                            
+                            <!-- Profile Dropdown -->
+                            <div id="profileDropdown" class="profile-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
+                                <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                                    <div style="font-weight: 600; color: var(--gray-900);"><%= vendor.firstName %> <%= vendor.lastName %></div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);"><%= vendor.email %></div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">Company: <%= vendor.companyName || 'Not set' %></div>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <a href="/vendor/profile-details" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-person"></i> View Profile
+                                    </a>
+                                    <a href="/vendor/profile" style="display: block; padding: 0.5rem 1rem; color: var(--gray-700); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-gear"></i> Edit Profile
+                                    </a>
+                                    <a href="/vendor/logout" style="display: block; padding: 0.5rem 1rem; color: var(--danger); text-decoration: none; border-radius: 0.375rem; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <% if (messages.error) { %>
+                    <div class="alert alert-error"><%= messages.error %></div>
+                <% } %>
+                <% if (messages.success) { %>
+                    <div class="alert alert-success"><%= messages.success %></div>
+                <% } %>
+
+                <!-- Test Communication Panel -->
+                <div class="card" style="margin-bottom: 1.5rem; display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="bi bi-broadcast"></i> Test Communication</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <button class="btn btn-success" onclick="testSMS()" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                                <i class="bi bi-chat-text" style="font-size: 1.5rem;"></i>
+                                <span>Test SMS</span>
+                                <small style="opacity: 0.8;">Send test message</small>
+                            </button>
+                            <button class="btn btn-primary" onclick="testEmail()" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                                <i class="bi bi-envelope" style="font-size: 1.5rem;"></i>
+                                <span>Test Email</span>
+                                <small style="opacity: 0.8;">Send test email</small>
+                            </button>
+                            <button class="btn btn-warning" onclick="testVoiceCall()" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                                <i class="bi bi-telephone" style="font-size: 1.5rem;"></i>
+                                <span>Test Voice Call</span>
+                                <small style="opacity: 0.8;">Make test call</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title"><i class="bi bi-telephone"></i> All Call Schedules (<%= scheduledCalls.length %>)</h3>
+                        <button class="btn btn-primary" onclick="openScheduleModal()">
+                            <i class="bi bi-plus-circle"></i> Schedule New Call
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Context</th>
+                                        <th>Scheduled Time</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (scheduledCalls.length === 0) { %>
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                                No calls scheduled yet
+                                            </td>
+                                        </tr>
+                                    <% } else { %>
+                                        <% scheduledCalls.forEach(call => { %>
+                                            <tr>
+                                                <td><%= call.phoneNumber %></td>
+                                                <td><%= call.email || '-' %></td>
+                                                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                                    <%= call.context %>
+                                                </td>
+                                                <td><%= new Date(call.scheduledTime).toLocaleString() %></td>
+                                                <td>
+                                                    <span class="badge badge-<%= call.status === 'completed' ? 'success' : call.status === 'failed' ? 'danger' : 'warning' %>">
+                                                        <%= call.status.toUpperCase() %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                                        <% if (call.phoneNumber) { %>
+                                                            <button class="btn btn-success btn-sm" onclick="executeAction('<%= call._id %>', 'sms')" title="Send SMS" style="display: none;">
+                                                                <i class="bi bi-chat-text"></i>
+                                                            </button>
+                                                            <button class="btn btn-warning btn-sm" onclick="executeAction('<%= call._id %>', 'call')" title="Make Voice Call">
+                                                                <i class="bi bi-telephone"></i>
+                                                            </button>
+                                                        <% } %>
+                                                        <% if (call.email) { %>
+                                                            <button class="btn btn-primary btn-sm" onclick="executeAction('<%= call._id %>', 'email')" title="Send Email" style="display: none;">
+                                                                <i class="bi bi-envelope"></i>
+                                                            </button>
+                                                        <% } %>
+                                                        <button class="btn btn-outline btn-sm" onclick="editCall('<%= call._id %>')" title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button class="btn btn-danger btn-sm" onclick="deleteCall('<%= call._id %>')" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal" id="scheduleModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-plus-circle"></i> Schedule New Call</h3>
+            <form method="POST" action="/vendor/schedule-call">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone Number *</label>
+                    <input type="tel" name="phoneNumber" required placeholder="+1 (555) 123-4567" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email Address (Optional)</label>
+                    <input type="email" name="email" placeholder="recipient@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Call Context</label>
+                    <textarea name="context" required placeholder="Brief description of the call purpose..." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 80px;"></textarea>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">AI Agent Instructions</label>
+                    <textarea id="scheduleCallDescription" name="callDescription" required placeholder="Detailed instructions for the AI agent..." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 80px;"></textarea>
+                    <button type="button" class="btn btn-outline" onclick="enhanceInstructions('scheduleCallDescription')" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                        <i class="bi bi-magic"></i> Enhance by AI
+                    </button>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scheduled Time</label>
+                    <input type="datetime-local" name="scheduledTime" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Schedule Call</button>
+                    <button type="button" class="btn btn-outline" onclick="closeScheduleModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-pencil"></i> Edit Call Schedule</h3>
+            <form id="editForm">
+                <input type="hidden" id="editCallId">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone Number *</label>
+                    <input type="tel" id="editPhoneNumber" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email Address (Optional)</label>
+                    <input type="email" id="editEmail" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Call Context</label>
+                    <textarea id="editContext" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 80px;"></textarea>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">AI Agent Instructions</label>
+                    <textarea id="editCallDescription" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 80px;"></textarea>
+                    <button type="button" class="btn btn-outline" onclick="enhanceInstructions('editCallDescription')" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                        <i class="bi bi-magic"></i> Enhance by AI
+                    </button>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scheduled Time</label>
+                    <input type="datetime-local" id="editScheduledTime" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Update Call</button>
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Test SMS Modal -->
+    <div class="modal" id="testSMSModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 400px;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-chat-text"></i> Test SMS</h3>
+            <form id="testSMSForm">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone Number</label>
+                    <input type="tel" id="testSMSPhone" value="+918986534005" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Message</label>
+                    <textarea id="testSMSMessage" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 80px;">Test SMS from AI Voice Agent SaaS - Your SMS system is working perfectly! 📱✅</textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-send"></i> Send SMS</button>
+                    <button type="button" class="btn btn-outline" onclick="closeTestSMSModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Test Email Modal -->
+    <div class="modal" id="testEmailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-envelope"></i> Test Email</h3>
+            <form id="testEmailForm">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email Address</label>
+                    <input type="email" id="testEmailAddress" value="uday72192@gmail.com" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Subject</label>
+                    <input type="text" id="testEmailSubject" value="Test Email from AI Voice Agent SaaS" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Message</label>
+                    <textarea id="testEmailMessage" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 100px;">Hello! This is a test email from your AI Voice Agent SaaS platform.
+
+Your email system is working perfectly! 📧✅
+
+Best regards,
+AI Voice Agent Team</textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Send Email</button>
+                    <button type="button" class="btn btn-outline" onclick="closeTestEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Test Voice Call Modal -->
+    <div class="modal" id="testCallModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 500px;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-telephone"></i> Test Voice Call</h3>
+            <form id="testCallForm">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone Number</label>
+                    <input type="tel" id="testCallPhone" value="+918986534005" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Voice Message</label>
+                    <textarea id="testCallMessage" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.375rem; height: 100px;">Hello! This is a test call from your AI Voice Agent SaaS platform. Your voice calling system is working perfectly. Thank you for testing!</textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-warning"><i class="bi bi-telephone"></i> Make Call</button>
+                    <button type="button" class="btn btn-outline" onclick="closeTestCallModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const adminInfo = document.querySelector('.admin-info');
+            const dropdown = document.getElementById('profileDropdown');
+            if (adminInfo && dropdown && !adminInfo.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Set active nav link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Set minimum datetime to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const datetimeInputs = document.querySelectorAll('input[type="datetime-local"]');
+            datetimeInputs.forEach(input => {
+                input.min = now.toISOString().slice(0, 16);
+            });
+        });
+
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').style.display = 'flex';
+        }
+        
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').style.display = 'none';
+        }
+        
+        function editCall(callId) {
+            fetch('/vendor/edit-call/' + callId)
+                .then(response => response.json())
+                .then(call => {
+                    document.getElementById('editCallId').value = call._id;
+                    document.getElementById('editPhoneNumber').value = call.phoneNumber || '';
+                    document.getElementById('editEmail').value = call.email || '';
+                    document.getElementById('editContext').value = call.context;
+                    document.getElementById('editCallDescription').value = call.callDescription;
+                    
+                    const date = new Date(call.scheduledTime);
+                    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                    document.getElementById('editScheduledTime').value = date.toISOString().slice(0, 16);
+                    
+                    document.getElementById('editModal').style.display = 'flex';
+                })
+                .catch(err => alert('Error loading call details'));
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const callId = document.getElementById('editCallId').value;
+            const formData = {
+                phoneNumber: document.getElementById('editPhoneNumber').value,
+                email: document.getElementById('editEmail').value,
+                context: document.getElementById('editContext').value,
+                callDescription: document.getElementById('editCallDescription').value,
+                scheduledTime: document.getElementById('editScheduledTime').value
+            };
+            
+            fetch('/vendor/edit-call/' + callId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeEditModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(err => alert('Error updating call'));
+        });
+
+        function deleteCall(callId) {
+            if (confirm('Are you sure you want to delete this call?')) {
+                fetch('/vendor/delete-call/' + callId, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                })
+                .catch(err => alert('Error deleting call'));
+            }
+        }
+        
+
+
+        // Test Communication Functions - Open Modals
+        function testSMS() {
+            document.getElementById('testSMSModal').style.display = 'flex';
+        }
+        
+        function testEmail() {
+            document.getElementById('testEmailModal').style.display = 'flex';
+        }
+        
+        function testVoiceCall() {
+            document.getElementById('testCallModal').style.display = 'flex';
+        }
+        
+        // Modal Close Functions
+        function closeTestSMSModal() {
+            document.getElementById('testSMSModal').style.display = 'none';
+        }
+        
+        function closeTestEmailModal() {
+            document.getElementById('testEmailModal').style.display = 'none';
+        }
+        
+        function closeTestCallModal() {
+            document.getElementById('testCallModal').style.display = 'none';
+        }
+        
+        // Test Form Submissions
+        document.getElementById('testSMSForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+            button.disabled = true;
+            
+            fetch('/api/communication/send-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: document.getElementById('testSMSPhone').value,
+                    message: document.getElementById('testSMSMessage').value
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('✅ SMS sent successfully! Check your phone.');
+                    closeTestSMSModal();
+                } else {
+                    alert('❌ SMS failed: ' + result.error);
+                }
+            })
+            .catch(err => alert('❌ SMS test failed: ' + err.message))
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        });
+        
+        document.getElementById('testEmailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+            button.disabled = true;
+            
+            fetch('/api/communication/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('testEmailAddress').value,
+                    subject: document.getElementById('testEmailSubject').value,
+                    message: document.getElementById('testEmailMessage').value
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('✅ Email sent successfully! Check your inbox.');
+                    closeTestEmailModal();
+                } else {
+                    alert('❌ Email failed: ' + result.error);
+                }
+            })
+            .catch(err => alert('❌ Email test failed: ' + err.message))
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        });
+        
+        document.getElementById('testCallForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Calling...';
+            button.disabled = true;
+            
+            fetch('/vendor/test-voice-call', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: document.getElementById('testCallPhone').value,
+                    message: document.getElementById('testCallMessage').value
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('✅ Voice call initiated successfully! You should receive a call shortly. 📞');
+                    closeTestCallModal();
+                } else {
+                    alert('❌ Voice call failed: ' + result.error);
+                }
+            })
+            .catch(err => alert('❌ Voice call test failed: ' + err.message))
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        });
+
+        // Execute communication action from table
+        function executeAction(callId, actionType) {
+            const button = event.target;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            button.disabled = true;
+            
+            fetch('/vendor/execute-action/' + callId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actionType })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert(`✅ ${actionType.toUpperCase()} sent successfully!`);
+                    // Refresh the page to show updated status
+                    location.reload();
+                } else {
+                    alert(`❌ ${actionType.toUpperCase()} failed: ` + result.error);
+                }
+            })
+            .catch(err => alert(`❌ ${actionType.toUpperCase()} failed: ` + err.message))
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        }
+
+        function enhanceInstructions(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const instructions = textarea.value.trim();
+            
+            if (!instructions) {
+                alert('Please enter some instructions first');
+                return;
+            }
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enhancing...';
+            button.disabled = true;
+            
+            fetch('/api/ai/enhance-instructions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instructions })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.enhancedInstructions) {
+                    textarea.value = result.enhancedInstructions;
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(err => alert('Error enhancing instructions'))
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
